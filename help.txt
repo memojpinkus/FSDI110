@@ -1,0 +1,27 @@
+# install packages
+
+python -m pip install <name>
+
+# create the venv
+python -m venv venv
+
+# activate the venv
+
+win:
+    venv\Scripts\activate
+
+
+mac:
+    source venv/bin/activate
+
+
+
+
+# git commands
+git add .
+git commit -m "110 #2"
+git push
+
+
+# view the URL
+git remote -v
