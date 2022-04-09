@@ -173,6 +173,20 @@ def save_coupon():
 
     coupon = request.get_json()
 
+
+    #must contain code, discount
+    if not "code" in coupon or not "discount" in coupon:
+        abort(400, "Invalid Coupon: No code and discount")
+
+    #code should have at least 5 characters
+    if len(coupon["code"]) < 5:
+        abort(400, "Invalid Coupon: Coupon code should be at least 5 characters long")
+
+    #discount should not be lower than 5 and not greater than 50
+    if len(coupon["code"]) < 5 or len(coupon["code"]) > 50:
+        abort(400, "Invalid Coupon: Coupon code should be at least 5 characters long and maximum 50 characters")
+
+    
     db.couponCodes.insert_one(coupon)
     
     coupon["_id"] = str(coupon["_id"])
@@ -185,10 +199,70 @@ def getcouponcode(code):
     coupon = db.couponCodes.find_one({"code", code})
 
     if not coupon:
-        return abort(404, "No product with such id")
+        return abort(404, "No coupon with such id")
 
     coupon["_id"] = str(coupon["_id"])
+
     return json.dumps(coupon)
 
+
+
+
+
+############################################################
+#################### Users Endpoints #######################
+############################################################
+
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    all_users = []
+    cursor = db.users.find({})
+
+    for user in cursor:
+        user["_id"] = str(user["_id"])
+        all_users.append(user)
+
+    return json.dumps(all_users)
+
+
+@app.route("/api/users", methods=["POST"])
+def save_user():
+    user = request.get_json()
+    db.users.insert_one(user)
+
+    user["_id"] = str(user["_id"])
+
+    return json.dumps(user)
+
+@app.route("/api/users/<email>")
+def get_user_by_email(email):
+    user = db.users.find_one({"email": email})
+    
+    if not user:
+        return abort(404, "No user with that email")
+
+    user["_id"] = str(user["_id"])
+
+    return json.dumps(user)
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data=request.get_json()
+    
+    if not "user" in data:
+        abort(400, "User is required to login")
+
+    if not "password" in data:
+        return abort(400, "Password is required for login")
+
+    user = db.users.find_one({"userName": data["user"], "password": data["password"]})
+
+    if not user:
+        abort(401, "Invalid login")
+
+    
+
+    return json.dumps(user)
 
 app.run(debug=True)
